@@ -25,6 +25,7 @@ MIXED_SUFFIXES = ["1!", "12!", "123!", "!1", "!12", "!123", "01!", "001!", "321!
 SPECIAL_CHARS = ["!", "@", "#", "-", "_", "."]
 TRANSFORM_CHOICES = ["basic", "plus", "insane"]
 BACK_TOKEN = "&&&"
+SHAMBLE_MAX_LENGTH = 8
 
 
 class Backtrack(Exception):
@@ -295,6 +296,16 @@ def case_variants(token: str, full: bool = True) -> Set[str]:
     return {v for v in variants if v}
 
 
+def shamble_variants(token: str, max_length: int = SHAMBLE_MAX_LENGTH) -> Set[str]:
+    """Return all character permutations for reasonably sized tokens."""
+    variants: Set[str] = set()
+    for value in {token, token.replace(" ", "")}:
+        if len(value) <= 1 or len(value) > max_length:
+            continue
+        variants.update("".join(p) for p in itertools.permutations(value))
+    return variants
+
+
 def parse_dates(values: Iterable[str]) -> Set[str]:
     date_forms: Set[str] = set()
     patterns = [
@@ -389,6 +400,7 @@ def build_token_variants(tokens: List[str], transform_set: str) -> Set[str]:
     full = transform_set in ("plus", "insane")
     for token in tokens:
         variants.update(case_variants(token, full=full))
+        variants.update(shamble_variants(token))
     return variants
 
 
@@ -403,6 +415,10 @@ def generate_candidates(
     years = {d for d in date_forms if len(d) in (2, 4)}
     condensed_dates = {d for d in date_forms if len(d) in (4, 6, 8)}
     numeric_parts = set(NUMBER_PATTERNS) | years | condensed_dates
+    shambled_numbers: Set[str] = set()
+    for num in numeric_parts:
+        shambled_numbers.update(shamble_variants(num))
+    numeric_parts |= shambled_numbers
     basic_variants = set()
     for t in tokens:
         basic_variants.update(case_variants(t, full=False))
