@@ -31,8 +31,8 @@ Straightforward. Ethical. Fast.
 ## 📦 Installation
 
 ```bash
-git clone https://github.com/<your-repo>/octo-cupp.git
-cd octo-cupp
+git clone https://github.com/h050sh/octo-cupp-profiler.git
+cd octo-cupp-profiler
 python3 main.py --help
 ```
 
